@@ -13,7 +13,6 @@ def train_model(model, device, criterion, optimizer, train_loader, num_epochs=10
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             optimizer.zero_grad()
             outputs = model(X_batch)
-            print(outputs)
             loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
