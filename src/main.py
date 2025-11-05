@@ -1,14 +1,45 @@
-from amr_utility import get_seq_label_simple
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from load_data import *
+from SimpleNet import SimpleNet
+
+
+def train_model(model, device, criterion, optimizer, train_loader, num_epochs=10):
+    for epoch in range(num_epochs):
+        model.train()
+        running_loss = 0.0
+        for X_batch, y_batch in train_loader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            optimizer.zero_grad()
+            outputs = model(X_batch)
+            print(outputs)
+            loss = criterion(outputs, y_batch)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item() * X_batch.size(0)
+        print(f"Epoche {epoch + 1}/{num_epochs}, Verlust: {running_loss / len(train_loader.dataset):.4f}")
+
+
+def test_model(model, device, test_loader):
+    model.eval()
+    correct, total = 0, 0
+    with torch.no_grad():
+        for X_batch, y_batch in test_loader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            outputs = model(X_batch)
+            _, predicted = torch.max(outputs, 1)
+            total += y_batch.size(0)
+            correct += (predicted == y_batch).sum().item()
+    print(f"Testgenauigkeit: {100 * correct / total:.2f}%")
 
 
 if __name__ == "__main__":
-    # Loading easy dataset
-    ds = get_seq_label_simple("Staphylococcus_aureus_cefoxitin_pbp4")
+    train_loader, test_loader = get_dataloader()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = SimpleNet().to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    seq_train = [x[0] for x in ds["train"]]
-    y_train = [x[1] for x in ds["train"]]
-
-    seq_test = [x[0] for x in ds["test"]]
-    y_test = [x[1] for x in ds["test"]]
-
-    print(seq_train)
+    train_model(model, device, criterion, optimizer, train_loader)
+    test_model(model, device, test_loader)
