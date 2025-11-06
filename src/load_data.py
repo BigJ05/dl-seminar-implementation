@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from amr_utility import get_seq_label_simple
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
 
 
 def convert_seq(seq):
@@ -10,10 +10,16 @@ def convert_seq(seq):
     return sequences
 
 
-def resample(X, y):
+def ros_resample(X, y):
     ros = RandomOverSampler(sampling_strategy=1.0)
     X_resampled, y_resampled = ros.fit_resample(X, y)
     return X_resampled, y_resampled
+
+
+def smote_resample(X, y):
+    smote = SMOTE(sampling_strategy=1.0)
+    X_smote, y_smote = smote.fit_resample(X, y)
+    return X_smote, y_smote
 
 
 def get_seq_datasets(dataset="Staphylococcus_aureus_cefoxitin_pbp4"):
@@ -27,7 +33,7 @@ def get_seq_datasets(dataset="Staphylococcus_aureus_cefoxitin_pbp4"):
     seq_test = convert_seq(seq_test)
     seq_train = convert_seq(seq_train)
 
-    seq_train, y_train = resample(seq_train, y_train)
+    seq_train, y_train = smote_resample(seq_train, y_train)
     print(len(seq_train))
 
     train = TensorDataset(torch.tensor(seq_train), torch.tensor(y_train))
