@@ -37,6 +37,7 @@ if __name__ == "__main__":
     train_loader, test_loader = get_dataloader()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = SimpleNet().to(device)
+    weights = torch.tensor([661/139, 1.0], device=device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 

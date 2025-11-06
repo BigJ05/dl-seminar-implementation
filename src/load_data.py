@@ -1,12 +1,19 @@
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from amr_utility import get_seq_label_simple
+from imblearn.over_sampling import RandomOverSampler
 
 
 def convert_seq(seq):
     swap = {'A': 0.25, 'G': 0.5, 'C': 0.75, 'T': 1.0}
     sequences = [[swap[char] for char in s] for s in seq]
-    return torch.tensor(sequences)
+    return sequences
+
+
+def resample(X, y):
+    ros = RandomOverSampler(sampling_strategy=1.0)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
+    return X_resampled, y_resampled
 
 
 def get_seq_datasets(dataset="Staphylococcus_aureus_cefoxitin_pbp4"):
@@ -17,8 +24,14 @@ def get_seq_datasets(dataset="Staphylococcus_aureus_cefoxitin_pbp4"):
     seq_test = [x[0] for x in seq_data["test"]]
     y_test = [x[1] for x in seq_data["test"]]
 
-    train = TensorDataset(convert_seq(seq_train), torch.tensor(y_train))
-    test = TensorDataset(convert_seq(seq_test), torch.tensor(y_test))
+    seq_test = convert_seq(seq_test)
+    seq_train = convert_seq(seq_train)
+
+    seq_train, y_train = resample(seq_train, y_train)
+    print(len(seq_train))
+
+    train = TensorDataset(torch.tensor(seq_train), torch.tensor(y_train))
+    test = TensorDataset(torch.tensor(seq_test), torch.tensor(y_test))
 
     return train, test
 
