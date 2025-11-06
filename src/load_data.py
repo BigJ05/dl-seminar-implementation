@@ -36,8 +36,8 @@ def get_seq_datasets(dataset="Staphylococcus_aureus_cefoxitin_pbp4"):
     seq_train, y_train = smote_resample(seq_train, y_train)
     print(len(seq_train))
 
-    train = TensorDataset(torch.tensor(seq_train), torch.tensor(y_train))
-    test = TensorDataset(torch.tensor(seq_test), torch.tensor(y_test))
+    train = TensorDataset(torch.tensor(seq_train), torch.tensor(y_train).unsqueeze(1).float())
+    test = TensorDataset(torch.tensor(seq_test), torch.tensor(y_test).unsqueeze(1).float())
 
     return train, test
 

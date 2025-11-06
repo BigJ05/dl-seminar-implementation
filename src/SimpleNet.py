@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch.optim as optim
 
 
 class SimpleNet(nn.Module):
@@ -10,7 +9,7 @@ class SimpleNet(nn.Module):
             nn.ReLU(),
             nn.Linear(512, 128),
             nn.ReLU(),
-            nn.Linear(128, 2)
+            nn.Linear(128, 1)
         )
 
     def forward(self, x):
